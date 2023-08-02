@@ -5,6 +5,7 @@ import ErrorAlert from "../layout/ErrorAlert";
 import { postReservation } from "../utils/api";
 
 import "./Reservations.css";
+import { dayOfWeek, isInPast } from "../utils/date-time";
 
 function Reservations() {
   const history = useHistory();
@@ -14,9 +15,9 @@ function Reservations() {
     mobile_number: "555-555-5555",
     reservation_date: "2023-08-03",
     reservation_time: "12:05:00",
-    people: 5
-  }
-  const [formData, setFormData] = useState({...initialState});
+    people: 5,
+  };
+  const [formData, setFormData] = useState({ ...initialState });
   const [formValidationChecks, setFormValidationChecks] = useState({});
   const [postError, setPostError] = useState(null);
 
@@ -34,6 +35,27 @@ function Reservations() {
         });
     }
 
+    if (target.name === "reservation_date" && target.value !== "") {
+      if (isInPast(target.value, formData.reservation_time)) {
+        setFormValidationChecks({
+          ...formValidationChecks,
+          dateError: {
+            message: "Reservations may not be made for a date in the past",
+          },
+        });
+      } else if (dayOfWeek(target.value) === 2) {
+        setFormValidationChecks({
+          ...formValidationChecks,
+          dayOfWeekError: { message: "Reservations are not open on Tuesdays" },
+        });
+      } else {
+        setFormValidationChecks({
+          ...formValidationChecks,
+          dayOfWeekError: false,
+        });
+      }
+    }
+
     await setFormData({
       ...formData,
       [target.name]: target.value,
@@ -46,7 +68,7 @@ function Reservations() {
     async function create() {
       try {
         await postReservation(formData, abortController.signal);
-        setFormData({...initialState}); // RESET FORM
+        setFormData({ ...initialState }); // RESET FORM
         history.push("/dashboard");
       } catch (error) {
         await setPostError(error);
@@ -71,6 +93,9 @@ function Reservations() {
       </div>
 
       <ErrorAlert error={postError} />
+      {formValidationChecks.dayOfWeekError && (
+        <ErrorAlert error={formValidationChecks.dayOfWeekError} />
+      )}
       <div className="row">
         <div className="table form">
           <form className="form-group m-1" onSubmit={handleSubmit}>
@@ -150,7 +175,6 @@ function Reservations() {
                 <tr>
                   <td>
                     <label>Number of people: </label>
-                    
                   </td>
                   <td>
                     <input
@@ -161,7 +185,9 @@ function Reservations() {
                       required
                     />
                     {formValidationChecks.peopleError && (
-                      <p className="validation-error">Number of people must be greater than 0</p>
+                      <p className="validation-error">
+                        Number of people must be greater than 0
+                      </p>
                     )}
                   </td>
                 </tr>

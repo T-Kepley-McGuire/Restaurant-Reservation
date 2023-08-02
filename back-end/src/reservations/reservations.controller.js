@@ -4,11 +4,11 @@
 const service = require("./reservations.service");
 
 function hasDate(req, res, next) {
-  if(req.query.date) return next();
+  if (req.query.date) return next();
   next({
     status: 400,
-    message: `Please supply a date`
-  })
+    message: `Please supply a date`,
+  });
 }
 
 function allFieldsExist(req, ignore, next) {
@@ -49,6 +49,37 @@ function allFieldsExist(req, ignore, next) {
   });
 }
 
+function dateNotInPast(req, res, next) {
+  const { reservation_date, reservation_time } = req.body.data;
+  let [hour, minute] = reservation_time.split(":");
+  const today = new Date(Date.now());
+  const date = convertToDate(reservation_date);
+  date.setHours(hour, minute);
+  console.log(date);
+  if (date.valueOf() >= today.valueOf()) {
+    return next();
+  }
+  next({
+    status: 400,
+    message: `Date must be in future. Supplied date: ${reservation_date} ${reservation_time}`,
+  });
+}
+
+function convertToDate(date) {
+  let [year, month, day] = date.split("-");
+  month -= 1;
+  return new Date(year, month, day);
+}
+
+function dateNotTuesday(req, res, next) {
+  const { reservation_date: date } = req.body.data;
+  if (convertToDate(date).getDay() !== 2) return next();
+  next({
+    status: 400,
+    message: `Reservation must be for open day`,
+  });
+}
+
 function peopleAboveZero(req, res, next) {
   const { people } = req.body.data;
   if (people >= 1) return next();
@@ -59,14 +90,12 @@ function peopleAboveZero(req, res, next) {
 }
 
 async function list(req, res) {
-
   const reservationList = await service.list(req.query.date);
 
   res.json({ data: reservationList });
 }
 
 async function post(req, res) {
-
   const newReservation = await service.post(req.body.data);
 
   res.status(201).json({ data: newReservation });
@@ -74,5 +103,5 @@ async function post(req, res) {
 
 module.exports = {
   list: [hasDate, list],
-  post: [allFieldsExist, peopleAboveZero, post],
+  post: [allFieldsExist, dateNotInPast, dateNotTuesday, peopleAboveZero, post],
 };
