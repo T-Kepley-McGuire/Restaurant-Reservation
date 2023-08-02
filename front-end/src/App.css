@@ -1,0 +1,38 @@
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+}
+
+#root {
+  height: 100%;
+}
+
+.table {
+    border: solid #dee2e6 1px;
+    border-radius: 10px;
+    width: 100%;
+    /* max-width: 500px; */
+    border-collapse: collapse; /* To collapse table borders */
+    table-layout: fixed;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  tr {
+    border-bottom: solid #dee2e6 1px!important;
+  }
+
+  tbody tr:last-child {
+    border-width: 0px!important;
+  }
+  
+  th, td {
+    border-width: 0px!important;
+    margin: 5px;
+  }
+  

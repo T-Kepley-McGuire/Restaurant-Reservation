@@ -1,0 +1,28 @@
+th:nth-child(1),
+td:nth-child(1) {
+  width: auto;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  width: auto;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 22%;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 15%;
+}
+
+.navigate {
+    display: flex;
+    justify-content: space-between;
+}
+
+main {
+  max-width: 500px;
+}

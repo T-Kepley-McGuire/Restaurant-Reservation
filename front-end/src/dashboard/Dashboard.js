@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { listReservations } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
+import { formatAsTime, previous, today, next } from "../utils/date-time";
+
+import "./Dashboard.css";
 
 /**
  * Defines the dashboard page.
@@ -9,6 +13,11 @@ import ErrorAlert from "../layout/ErrorAlert";
  * @returns {JSX.Element}
  */
 function Dashboard({ date }) {
+  // const query = useQuery();
+  // const date = query.get("date");
+
+  const history = useHistory();
+
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
 
@@ -23,14 +32,66 @@ function Dashboard({ date }) {
     return () => abortController.abort();
   }
 
+  function moveDates(toDate) {
+      history.push(`/dashboard?date=${toDate}`);
+    
+  }
+
   return (
     <main>
       <h1>Dashboard</h1>
       <div className="d-md-flex mb-3">
-        <h4 className="mb-0">Reservations for date</h4>
+        <h4 className="mb-0">Reservations for date {date}</h4>
       </div>
       <ErrorAlert error={reservationsError} />
-      {JSON.stringify(reservations)}
+      <div className="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Mobile Number</th>
+              <th>Date</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reservations.length ? (
+              reservations.map((res, index) => {
+                return (
+                  <tr key={index}>
+                    <td>
+                      {res.first_name} {res.last_name}
+                    </td>
+                    <td>{res.mobile_number}</td>
+                    <td>{res.reservation_date}</td>
+                    <td>{formatAsTime(res.reservation_time)}</td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="4">
+                  <p>No reservations for date {date}</p>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="btn-container navigate">
+        <button
+          onClick={() => moveDates(previous(date))}
+          className="btn btn-secondary"
+        >
+          Previous
+        </button>
+        <button onClick={() => moveDates(today())} className="btn btn-success">
+          Today
+        </button>
+        <button onClick={() => moveDates(next(date))} className="btn btn-primary">
+          Next
+        </button>
+      </div>
     </main>
   );
 }
