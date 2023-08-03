@@ -91,15 +91,20 @@ export function dayOfWeek(date) {
   return convertToDate(date).getDay();
 }
 
-export function isInPast(_date, time="00:00:00") {
-  let [hour, minute ] = time.split(":");
+export function isInPast(_date, time = "00:00:00") {
+  let [hour, minute] = time.split(":");
   const today = new Date(Date.now());
-  console.log(time);
   const date = convertToDate(_date);
   date.setHours(hour, minute);
-  console.log(date);
   if (date.valueOf() < today.valueOf()) {
     return true;
   }
+  return false;
+}
+
+export function currentlyClosed(time) {
+  let [hour, minute] = time.split(":");
+  if ((hour === 10 && minute < 30) || hour < 10) return true;
+  if ((hour === 21 && minute > 30) || hour > 21) return true;
   return false;
 }

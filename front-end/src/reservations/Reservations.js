@@ -5,7 +5,7 @@ import ErrorAlert from "../layout/ErrorAlert";
 import { postReservation } from "../utils/api";
 
 import "./Reservations.css";
-import { dayOfWeek, isInPast } from "../utils/date-time";
+import { dayOfWeek, isInPast, currentlyClosed } from "../utils/date-time";
 
 function Reservations() {
   const history = useHistory();
@@ -17,43 +17,76 @@ function Reservations() {
     reservation_time: "12:05:00",
     people: 5,
   };
+  const initialErrorState = {
+    dayError: false,
+    peopleError: false,
+    reservationInPastError: false,
+  };
   const [formData, setFormData] = useState({ ...initialState });
-  const [formValidationChecks, setFormValidationChecks] = useState({});
+  const [validationChecks, setValidationChecks] = useState({
+    ...initialErrorState,
+  });
   const [postError, setPostError] = useState(null);
+
+  const checkNumberOfPeople = (num) => {
+    if (num < 1) {
+      setValidationChecks({
+        ...validationChecks,
+        peopleError: true,
+      });
+    } else {
+      setValidationChecks({
+        ...validationChecks,
+        peopleError: false,
+      });
+    }
+  };
+
+  const checkIfInPast = (date, time) => {
+    setValidationChecks((prevValidationChecks) => ({
+      ...prevValidationChecks,
+      reservationInPastError: isInPast(date, time)
+        ? {
+            message: "Reservations may not be made anytime in the past",
+          }
+        : false,
+    }));
+  };
+
+  const checkDayOfWeek = (date) => {
+    setValidationChecks((prevValidationChecks) => ({
+      ...prevValidationChecks,
+      dayError:
+        dayOfWeek(date) === 2
+          ? { message: "Reservations are not open on Tuesdays" }
+          : false,
+    }));
+  };
+
+  const checkIfClosed = (time) => {
+    setValidationChecks((prevValidationChecks) => ({
+      ...prevValidationChecks,
+      timeError: currentlyClosed(time)
+        ? {
+            message:
+              "Reservations may not be made for this time. Please pick a time between 10:30am and 9:30pm",
+          }
+        : false,
+    }));
+  };
 
   const handleChange = async ({ target }) => {
     if (target.name === "people" && target.value !== "") {
-      if (target.value < 1)
-        setFormValidationChecks({
-          ...formValidationChecks,
-          peopleError: true,
-        });
-      else
-        setFormValidationChecks({
-          ...formValidationChecks,
-          peopleError: false,
-        });
-    }
-
-    if (target.name === "reservation_date" && target.value !== "") {
-      if (isInPast(target.value, formData.reservation_time)) {
-        setFormValidationChecks({
-          ...formValidationChecks,
-          dateError: {
-            message: "Reservations may not be made for a date in the past",
-          },
-        });
-      } else if (dayOfWeek(target.value) === 2) {
-        setFormValidationChecks({
-          ...formValidationChecks,
-          dayOfWeekError: { message: "Reservations are not open on Tuesdays" },
-        });
-      } else {
-        setFormValidationChecks({
-          ...formValidationChecks,
-          dayOfWeekError: false,
-        });
-      }
+      checkNumberOfPeople(target.value);
+    } else if (target.name === "reservation_date" && target.value !== "") {
+      checkIfInPast(target.value, formData.reservation_time);
+      checkDayOfWeek(target.value);
+    } else if (target.name === "reservation_time" && target.value !== "") {
+      checkIfInPast(
+        formData.reservation_date ? formData.reservation_date : "1970-01-01",
+        target.value
+      );
+      checkIfClosed(target.value);
     }
 
     await setFormData({
@@ -75,8 +108,8 @@ function Reservations() {
       }
     }
     if (!formData.people || formData.people < 1) {
-      setFormValidationChecks({
-        ...formValidationChecks,
+      setValidationChecks({
+        ...validationChecks,
         peopleError: true,
       });
     } else create();
@@ -93,9 +126,9 @@ function Reservations() {
       </div>
 
       <ErrorAlert error={postError} />
-      {formValidationChecks.dayOfWeekError && (
-        <ErrorAlert error={formValidationChecks.dayOfWeekError} />
-      )}
+      <ErrorAlert error={validationChecks.dayError} />
+      <ErrorAlert error={validationChecks.reservationInPastError} />
+      <ErrorAlert error={validationChecks.timeError} />
       <div className="row">
         <div className="table form">
           <form className="form-group m-1" onSubmit={handleSubmit}>
@@ -184,7 +217,7 @@ function Reservations() {
                       value={formData.people}
                       required
                     />
-                    {formValidationChecks.peopleError && (
+                    {validationChecks.peopleError && (
                       <p className="validation-error">
                         Number of people must be greater than 0
                       </p>

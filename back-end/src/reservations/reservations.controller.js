@@ -11,6 +11,24 @@ function hasDate(req, res, next) {
   });
 }
 
+function isCurrentlyOpen(req, res, next) {
+  const { reservation_time: time } = req.body.data;
+  let [hour, minute] = time.split(":");
+  hour = Number(hour);
+  mintue = Number(minute);
+  if (
+    (hour === 10 && minute < 30) ||
+    hour < 10 ||
+    (hour === 21 && minute > 30) ||
+    hour > 21
+  )
+    return next({
+      status: 400,
+      message: `Reservations are not open for time ${time}`,
+    });
+  next();
+}
+
 function allFieldsExist(req, ignore, next) {
   const {
     data: {
@@ -54,8 +72,7 @@ function dateNotInPast(req, res, next) {
   let [hour, minute] = reservation_time.split(":");
   const today = new Date(Date.now());
   const date = convertToDate(reservation_date);
-  date.setHours(hour, minute);
-  console.log(date);
+  date.setUTCHours(hour, minute);
   if (date.valueOf() >= today.valueOf()) {
     return next();
   }
@@ -103,5 +120,12 @@ async function post(req, res) {
 
 module.exports = {
   list: [hasDate, list],
-  post: [allFieldsExist, dateNotInPast, dateNotTuesday, peopleAboveZero, post],
+  post: [
+    allFieldsExist,
+    dateNotInPast,
+    dateNotTuesday,
+    isCurrentlyOpen,
+    peopleAboveZero,
+    post,
+  ],
 };
