@@ -21,6 +21,7 @@ function Reservations() {
     dayError: false,
     peopleError: false,
     reservationInPastError: false,
+    timeError: false,
   };
   const [formData, setFormData] = useState({ ...initialState });
   const [validationChecks, setValidationChecks] = useState({
