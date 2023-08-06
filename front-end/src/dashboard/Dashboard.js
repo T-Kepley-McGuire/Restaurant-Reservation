@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { listReservations } from "../utils/api";
+import { listReservations, listTables } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 import { formatAsTime, previous, today, next } from "../utils/date-time";
 
@@ -21,6 +21,9 @@ function Dashboard({ date }) {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
 
+  const [tables, setTables] = useState([]);
+  const [tablesError, setTablesError] = useState(null);
+
   useEffect(loadDashboard, [date]);
 
   function loadDashboard() {
@@ -29,12 +32,14 @@ function Dashboard({ date }) {
     listReservations({ date }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
+
+    listTables(abortController.signal).then(setTables).catch(setTablesError);
+
     return () => abortController.abort();
   }
 
   function moveDates(toDate) {
-      history.push(`/dashboard?date=${toDate}`);
-    
+    history.push(`/dashboard?date=${toDate}`);
   }
 
   return (
@@ -52,6 +57,7 @@ function Dashboard({ date }) {
               <th>Mobile Number</th>
               <th>Date</th>
               <th>Time</th>
+              <th>Seat Table</th>
             </tr>
           </thead>
           <tbody>
@@ -65,6 +71,14 @@ function Dashboard({ date }) {
                     <td>{res.mobile_number}</td>
                     <td>{res.reservation_date}</td>
                     <td>{formatAsTime(res.reservation_time)}</td>
+                    <td className="btn-container">
+                      <a
+                        className="btn btn-primary"
+                        href={`/reservation/${res.reservation_id}/seat`}
+                      >
+                        Seat
+                      </a>
+                    </td>
                   </tr>
                 );
               })
@@ -88,9 +102,41 @@ function Dashboard({ date }) {
         <button onClick={() => moveDates(today())} className="btn btn-success">
           Today
         </button>
-        <button onClick={() => moveDates(next(date))} className="btn btn-primary">
+        <button
+          onClick={() => moveDates(next(date))}
+          className="btn btn-primary"
+        >
           Next
         </button>
+      </div>
+      <br />
+      <div className="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>Capacity</th>
+              <th>Occupied</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tables.length ? (
+              tables.map((table, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{table.table_name}</td>
+                    <td>{table.capacity}</td>
+                    <td>{table.reservation_id ? "Occupied" : "Free"}</td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td>No tables found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </main>
   );
