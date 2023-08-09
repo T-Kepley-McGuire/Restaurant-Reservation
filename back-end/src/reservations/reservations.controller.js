@@ -3,6 +3,19 @@
  */
 const service = require("./reservations.service");
 
+async function reservationExists(req, res, next) {
+  const reservationId = Number(req.params.reservationId);
+  const foundReservation = await service.read(reservationId);
+  if (foundReservation) {
+    res.locals.reservation = foundReservation;
+    return next();
+  }
+  next({
+    status: 404,
+    message: `Reservation ID not found: ${reservationId}`,
+  });
+}
+
 function hasDate(req, res, next) {
   if (req.query.date) return next();
   next({
@@ -106,6 +119,10 @@ function peopleAboveZero(req, res, next) {
   });
 }
 
+async function read(req, res) {
+  res.json({ data: res.locals.reservation });
+}
+
 async function list(req, res) {
   const reservationList = await service.list(req.query.date);
 
@@ -120,6 +137,7 @@ async function post(req, res) {
 
 module.exports = {
   list: [hasDate, list],
+  read: [reservationExists, read],
   post: [
     allFieldsExist,
     dateNotInPast,

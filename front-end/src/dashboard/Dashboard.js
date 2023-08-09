@@ -74,7 +74,7 @@ function Dashboard({ date }) {
                     <td className="btn-container">
                       <a
                         className="btn btn-primary"
-                        href={`/reservation/${res.reservation_id}/seat`}
+                        href={`/reservations/${res.reservation_id}/seat`}
                       >
                         Seat
                       </a>

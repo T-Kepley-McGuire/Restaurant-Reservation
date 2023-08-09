@@ -3,6 +3,7 @@ import React from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
 import Reservations from "../reservations/Reservations";
+import ReservationSeat from "../reservations/ReservationSeat";
 import Tables from "../tables/Tables";
 import NotFound from "./NotFound";
 import { today } from "../utils/date-time";
@@ -31,6 +32,9 @@ function Routes() {
       </Route>
       <Route path="/reservations/new">
         <Reservations/>
+      </Route>
+      <Route path="/reservations/:reservationId/seat">
+        <ReservationSeat />
       </Route>
       <Route path="/tables/new">
         <Tables />
