@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { listReservations, listTables } from "../utils/api";
+import { listReservations, listTables, removeReservation } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 import { formatAsTime, previous, today, next } from "../utils/date-time";
 
@@ -40,6 +40,18 @@ function Dashboard({ date }) {
 
   function moveDates(toDate) {
     history.push(`/dashboard?date=${toDate}`);
+  }
+
+  async function unSeatTable(tableId) {
+    if (
+      window.confirm(
+        "Is this table ready to seat new guests? This cannot be undone."
+      )
+    ) {
+      const abortController = new AbortController();
+      await removeReservation(tableId, abortController.signal);
+      listTables(abortController.signal).then(setTables).catch(setTablesError);
+    }
   }
 
   return (
@@ -126,7 +138,19 @@ function Dashboard({ date }) {
                   <tr key={index}>
                     <td>{table.table_name}</td>
                     <td>{table.capacity}</td>
-                    <td>{table.reservation_id ? "Occupied" : "Free"}</td>
+                    <td>
+                      {table.reservation_id ? (
+                        <button
+                          className="btn btn-primary"
+                          data-table-id-finish={table.table_id}
+                          onClick={() => unSeatTable(table.table_id)}
+                        >
+                          Finish
+                        </button>
+                      ) : (
+                        "Available"
+                      )}
+                    </td>
                   </tr>
                 );
               })

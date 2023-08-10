@@ -5,7 +5,7 @@ function list() {
 }
 
 function read(tableId) {
-  return knex("tables").select("*").where({table_id: tableId}).first();
+  return knex("tables").select("*").where({ table_id: tableId }).first();
 }
 
 function post(data) {
@@ -22,9 +22,14 @@ function update(tableId, reservationId) {
     .update({ reservation_id: reservationId });
 }
 
+function destroy(tableId) {
+  return knex("tables").where({ table_id: tableId }).update({ reservation_id: null});
+}
+
 module.exports = {
   post,
   update,
   list,
-  read
+  read,
+  delete: destroy
 };

@@ -66,18 +66,38 @@ function allFieldsExist(req, ignore, next) {
     status: 400,
     message: `Missing information: ${
       !first_name
-        ? "first name"
+        ? "first_name"
         : !last_name
-        ? "last name"
+        ? "last_name"
         : !mobile_number
-        ? "phone number"
+        ? "mobile_number"
         : !reservation_date
-        ? "reservation date"
+        ? "reservation_date"
         : !reservation_time
-        ? "reservation time"
+        ? "reservation_time"
         : "people"
     }`,
   });
+}
+
+function dateIsValidDate(req, res, next) {
+  const { reservation_date } = req.body.data;
+  let date = new convertToDate(reservation_date);
+  if(!Number.isNaN(date.valueOf())) return next();
+  next({
+    status: 400,
+    message: `reservation_date must be date`
+  })
+}
+
+function timeIsValidTime(req, res, next) {
+  const {reservation_time} = req.body.data;
+  let time = Date.parse(`01 Jan 1970 ${reservation_time}`)
+  if(!Number.isNaN(time)) return next();
+  next({
+    status: 400,
+    message: `reservation_time must be time`
+  })
 }
 
 function dateNotInPast(req, res, next) {
@@ -106,13 +126,22 @@ function dateNotTuesday(req, res, next) {
   if (convertToDate(date).getDay() !== 2) return next();
   next({
     status: 400,
-    message: `Reservation must be for open day`,
+    message: `Reservation must be for open day. not closed lol`,
   });
+}
+
+function peopleIsANumber(req, res, next) {
+  const {people} = req.body.data;
+  if(typeof people === "number") return next();
+  next({
+    status: 400,
+    message: `people must be a number`
+  })
 }
 
 function peopleAboveZero(req, res, next) {
   const { people } = req.body.data;
-  if (people >= 1) return next();
+  if (typeof people === "number" && people >= 1) return next();
   next({
     status: 400,
     message: `Number of people must be greater than 0. Recieved ${people}`,
@@ -140,9 +169,12 @@ module.exports = {
   read: [reservationExists, read],
   post: [
     allFieldsExist,
+    dateIsValidDate,
+    timeIsValidTime,
     dateNotInPast,
     dateNotTuesday,
     isCurrentlyOpen,
+    peopleIsANumber,
     peopleAboveZero,
     post,
   ],

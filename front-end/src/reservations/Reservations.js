@@ -9,14 +9,7 @@ import { dayOfWeek, isInPast, currentlyClosed } from "../utils/date-time";
 
 function Reservations() {
   const history = useHistory();
-  const initialState = {
-    first_name: "ur",
-    last_name: "mom",
-    mobile_number: "555-555-5555",
-    reservation_date: "2023-08-03",
-    reservation_time: "12:05:00",
-    people: 5,
-  };
+  const initialState = {};
   const initialErrorState = {
     dayError: false,
     peopleError: false,

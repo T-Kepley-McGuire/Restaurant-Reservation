@@ -6,8 +6,7 @@ const controller = require("./tables.controller");
 //     next();
 // })
 
-router.route("/new").post(controller.post);
-router.route("/:table_id/seat").put(controller.update);
-router.route("/").get(controller.list);
+router.route("/:table_id/seat").put(controller.update).delete(controller.delete);
+router.route("/").get(controller.list).post(controller.post);
 
 module.exports = router;
