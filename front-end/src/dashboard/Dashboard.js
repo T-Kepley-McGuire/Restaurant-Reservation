@@ -51,6 +51,7 @@ function Dashboard({ date }) {
       const abortController = new AbortController();
       await removeReservation(tableId, abortController.signal);
       listTables(abortController.signal).then(setTables).catch(setTablesError);
+      listReservations({date}, abortController.signal).then(setReservations).catch(setReservationsError);
     }
   }
 
@@ -69,6 +70,7 @@ function Dashboard({ date }) {
               <th>Mobile Number</th>
               <th>Date</th>
               <th>Time</th>
+              <th>Status</th>
               <th>Seat Table</th>
             </tr>
           </thead>
@@ -83,14 +85,17 @@ function Dashboard({ date }) {
                     <td>{res.mobile_number}</td>
                     <td>{res.reservation_date}</td>
                     <td>{formatAsTime(res.reservation_time)}</td>
-                    <td className="btn-container">
+                    <td data-reservation-id-status={res.reservation_id}>
+                      {res.status}
+                    </td>
+                    {res.status === "booked" ? (<td className="btn-container">
                       <a
                         className="btn btn-primary"
                         href={`/reservations/${res.reservation_id}/seat`}
                       >
                         Seat
                       </a>
-                    </td>
+                    </td>) : null}
                   </tr>
                 );
               })

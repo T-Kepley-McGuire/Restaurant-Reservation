@@ -6,10 +6,9 @@ const service = require("./reservations.service");
 async function reservationExists(req, res, next) {
   const reservationId = Number(req.params.reservationId);
   const foundReservation = await service.read(reservationId);
-  if (foundReservation) {
-    res.locals.reservation = foundReservation;
-    return next();
-  }
+  res.locals.reservation = foundReservation;
+  if (foundReservation) return next();
+
   next({
     status: 404,
     message: `Reservation ID not found: ${reservationId}`,
@@ -83,21 +82,21 @@ function allFieldsExist(req, ignore, next) {
 function dateIsValidDate(req, res, next) {
   const { reservation_date } = req.body.data;
   let date = new convertToDate(reservation_date);
-  if(!Number.isNaN(date.valueOf())) return next();
+  if (!Number.isNaN(date.valueOf())) return next();
   next({
     status: 400,
-    message: `reservation_date must be date`
-  })
+    message: `reservation_date must be date`,
+  });
 }
 
 function timeIsValidTime(req, res, next) {
-  const {reservation_time} = req.body.data;
-  let time = Date.parse(`01 Jan 1970 ${reservation_time}`)
-  if(!Number.isNaN(time)) return next();
+  const { reservation_time } = req.body.data;
+  let time = Date.parse(`01 Jan 1970 ${reservation_time}`);
+  if (!Number.isNaN(time)) return next();
   next({
     status: 400,
-    message: `reservation_time must be time`
-  })
+    message: `reservation_time must be time`,
+  });
 }
 
 function dateNotInPast(req, res, next) {
@@ -131,12 +130,12 @@ function dateNotTuesday(req, res, next) {
 }
 
 function peopleIsANumber(req, res, next) {
-  const {people} = req.body.data;
-  if(typeof people === "number") return next();
+  const { people } = req.body.data;
+  if (typeof people === "number") return next();
   next({
     status: 400,
-    message: `people must be a number`
-  })
+    message: `people must be a number`,
+  });
 }
 
 function peopleAboveZero(req, res, next) {
@@ -145,6 +144,32 @@ function peopleAboveZero(req, res, next) {
   next({
     status: 400,
     message: `Number of people must be greater than 0. Recieved ${people}`,
+  });
+}
+
+function statusIsBooked(req, res, next) {
+  const { status } = req.body.data;
+  if (status === "booked") return next();
+  next({
+    status: 400,
+    message: `Status must be "booked", not ${status}`,
+  });
+}
+
+function statusIsValid(req, res, next) {
+  const { status } = req.body.data;
+  if (["booked", "seated", "finished"].includes(status)) return next();
+  next({
+    status: 400,
+    message: `Status ${status} is not valid. Please provide "booked", "seated", or "finished"`,
+  });
+}
+
+function statusIsNotFinished(req, res, next) {
+  if (res.locals.reservation.status !== "finished") return next();
+  next({
+    status: 400,
+    message: `Status of reservation must not already be finished`,
   });
 }
 
@@ -164,6 +189,13 @@ async function post(req, res) {
   res.status(201).json({ data: newReservation });
 }
 
+async function update(req, res, next) {
+  const reservationId = res.locals.reservation.reservation_id;
+  const { status } = req.body.data;
+  const updatedStatus = await service.update(reservationId, status);
+  res.status(200).json({ data: { status: updatedStatus[0].status } });
+}
+
 module.exports = {
   list: [hasDate, list],
   read: [reservationExists, read],
@@ -176,6 +208,8 @@ module.exports = {
     isCurrentlyOpen,
     peopleIsANumber,
     peopleAboveZero,
+    statusIsBooked,
     post,
   ],
+  update: [reservationExists, statusIsValid, statusIsNotFinished, update],
 };

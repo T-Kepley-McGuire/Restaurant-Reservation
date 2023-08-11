@@ -97,6 +97,23 @@ function capacityIsNumber(req, res, next) {
   });
 }
 
+function reservationNotSeated(req, res, next) {
+  if (res.locals.reservation.status === "booked") return next();
+  next({
+    status: 400,
+    message: `Reservation may not be already seated`,
+  });
+}
+function updateResConfig(status) {
+  return async function updateReservation(req, res, next) {
+    const reservationId = res.locals.reservation
+      ? res.locals.reservation.reservation_id
+      : res.locals.table.reservation_id;
+    await reservationService.update(reservationId, status);
+    next();
+  };
+}
+
 async function list(req, res, next) {
   const tables = await service.list();
   res.json({ data: tables });
@@ -109,9 +126,9 @@ async function post(req, res, next) {
 }
 
 async function update(req, res, next) {
-  const table_id = Number(req.params.table_id);
+  const tableId = Number(req.params.table_id);
   const { reservation_id } = req.body.data;
-  const updatedTable = await service.update(table_id, reservation_id);
+  const updatedTable = await service.update(tableId, reservation_id);
   res.json({ data: updatedTable });
 }
 
@@ -128,8 +145,10 @@ module.exports = {
     validReservation,
     tableIsFree,
     reservationLessThanCapacity,
+    reservationNotSeated,
+    updateResConfig("seated"),
     update,
   ],
   post: [allFieldsExist, tableNameLongerThanTwo, capacityIsNumber, post],
-  delete: [tableExists, tableIsOccupied, destroy],
+  delete: [tableExists, tableIsOccupied, updateResConfig("finished"), destroy],
 };
