@@ -15,11 +15,11 @@ async function reservationExists(req, res, next) {
   });
 }
 
-function hasDate(req, res, next) {
-  if (req.query.date) return next();
+function hasDateOrNumber(req, res, next) {
+  if (req.query.date || req.query.mobile_number) return next();
   next({
     status: 400,
-    message: `Please supply a date`,
+    message: `Please supply a ${req.query.date ? "mobile_number" : "date"}`,
   });
 }
 
@@ -178,7 +178,11 @@ async function read(req, res) {
 }
 
 async function list(req, res) {
-  const reservationList = await service.list(req.query.date);
+  const number = req.query.mobile_number;
+  const date = req.query.date;
+  const reservationList = date
+    ? await service.listDate(date)
+    : await service.listNumber(number);
 
   res.json({ data: reservationList });
 }
@@ -197,7 +201,7 @@ async function update(req, res, next) {
 }
 
 module.exports = {
-  list: [hasDate, list],
+  list: [hasDateOrNumber, list],
   read: [reservationExists, read],
   post: [
     allFieldsExist,
