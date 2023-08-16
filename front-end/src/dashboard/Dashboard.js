@@ -5,6 +5,7 @@ import ErrorAlert from "../layout/ErrorAlert";
 import { formatAsTime, previous, today, next } from "../utils/date-time";
 
 import "./Dashboard.css";
+import ReservationList from "../reservationList/reservationList";
 
 /**
  * Defines the dashboard page.
@@ -62,7 +63,8 @@ function Dashboard({ date }) {
         <h4 className="mb-0">Reservations for date {date}</h4>
       </div>
       <ErrorAlert error={reservationsError} />
-      <div className="table">
+      <ReservationList reservations={reservations} date={date}/>
+      {/* <div className="table">
         <table>
           <thead>
             <tr>
@@ -108,7 +110,7 @@ function Dashboard({ date }) {
             )}
           </tbody>
         </table>
-      </div>
+      </div> */}
       <div className="btn-container navigate">
         <button
           onClick={() => moveDates(previous(date))}

@@ -1,0 +1,15 @@
+.search {
+    display: flex;
+}
+
+h3 {
+    padding: 5px;
+    text-align: right;
+}
+
+.input {
+    margin: auto 2px;
+    width: 250px;
+    flex-grow: 2;
+}
+

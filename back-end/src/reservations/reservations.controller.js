@@ -16,7 +16,7 @@ async function reservationExists(req, res, next) {
 }
 
 function hasDateOrNumber(req, res, next) {
-  if (req.query.date || req.query.mobile_number) return next();
+  if (req.query.date || req.query.mobile_number || req.query.mobile_number === "") return next();
   next({
     status: 400,
     message: `Please supply a ${req.query.date ? "mobile_number" : "date"}`,
