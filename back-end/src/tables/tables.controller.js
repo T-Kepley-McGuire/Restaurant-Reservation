@@ -109,7 +109,7 @@ function updateResConfig(status) {
     const reservationId = res.locals.reservation
       ? res.locals.reservation.reservation_id
       : res.locals.table.reservation_id;
-    await reservationService.update(reservationId, status);
+    await reservationService.updateStatus(reservationId, status);
     next();
   };
 }

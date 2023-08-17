@@ -12,8 +12,8 @@ const controller = require("./reservations.controller");
 //     next();
 // })
 
-router.route("/:reservationId/status").put(controller.update);
-router.route("/:reservationId").get(controller.read);
+router.route("/:reservationId/status").put(controller.updateStatus);
+router.route("/:reservationId").get(controller.read).put(controller.update);
 router.route("/").get(controller.list).post(controller.post);
 
 module.exports = router;

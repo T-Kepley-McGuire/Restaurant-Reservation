@@ -13,7 +13,6 @@ function Search() {
   const [reservations, setReservations] = useState([]);
 
   const handleChange = async ({ target }) => {
-    console.log(target);
     await setFormData({ ...formData, [target.name]: target.value });
   };
 

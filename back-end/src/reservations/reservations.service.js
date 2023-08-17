@@ -29,7 +29,14 @@ function post(data) {
     .then((created) => created[0]);
 }
 
-function update(reservationId, status) {
+function update(reservationId, updatedInfo) {
+  return knex("reservations")
+    .returning("*")
+    .where({ reservation_id: reservationId })
+    .update(updatedInfo);
+}
+
+function updateStatus(reservationId, status) {
   return knex("reservations")
     .returning("*")
     .where({ reservation_id: reservationId })
@@ -42,4 +49,5 @@ module.exports = {
   listNumber,
   read,
   update,
+  updateStatus,
 };

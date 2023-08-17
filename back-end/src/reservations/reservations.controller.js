@@ -16,7 +16,12 @@ async function reservationExists(req, res, next) {
 }
 
 function hasDateOrNumber(req, res, next) {
-  if (req.query.date || req.query.mobile_number || req.query.mobile_number === "") return next();
+  if (
+    req.query.date ||
+    req.query.mobile_number ||
+    req.query.mobile_number === ""
+  )
+    return next();
   next({
     status: 400,
     message: `Please supply a ${req.query.date ? "mobile_number" : "date"}`,
@@ -149,7 +154,7 @@ function peopleAboveZero(req, res, next) {
 
 function statusIsBooked(req, res, next) {
   const { status } = req.body.data;
-  if (status === "booked") return next();
+  if (!status || status === "booked") return next();
   next({
     status: 400,
     message: `Status must be "booked", not ${status}`,
@@ -158,7 +163,8 @@ function statusIsBooked(req, res, next) {
 
 function statusIsValid(req, res, next) {
   const { status } = req.body.data;
-  if (["booked", "seated", "finished"].includes(status)) return next();
+  if (["booked", "seated", "finished", "cancelled"].includes(status))
+    return next();
   next({
     status: 400,
     message: `Status ${status} is not valid. Please provide "booked", "seated", or "finished"`,
@@ -170,6 +176,14 @@ function statusIsNotFinished(req, res, next) {
   next({
     status: 400,
     message: `Status of reservation must not already be finished`,
+  });
+}
+
+function statusBookedToCancelled(req, res, next) {
+  if (req.body.data.status !== "cancelled" || res.locals.reservation.status === "booked") return next();
+  next({
+    status: 400,
+    message: `Only reservations that are currently 'booked' may be cancelled`,
   });
 }
 
@@ -195,8 +209,15 @@ async function post(req, res) {
 
 async function update(req, res, next) {
   const reservationId = res.locals.reservation.reservation_id;
+  const newReservation = req.body.data;
+  const updatedStatus = await service.update(reservationId, newReservation);
+  res.status(200).json({ data: updatedStatus[0] });
+}
+
+async function updateStatus(req, res, next) {
+  const reservationId = res.locals.reservation.reservation_id;
   const { status } = req.body.data;
-  const updatedStatus = await service.update(reservationId, status);
+  const updatedStatus = await service.updateStatus(reservationId, status);
   res.status(200).json({ data: { status: updatedStatus[0].status } });
 }
 
@@ -215,5 +236,20 @@ module.exports = {
     statusIsBooked,
     post,
   ],
-  update: [reservationExists, statusIsValid, statusIsNotFinished, update],
+  update: [
+    reservationExists,
+    allFieldsExist,
+    dateIsValidDate,
+    timeIsValidTime,
+    peopleIsANumber,
+    peopleAboveZero,
+    update,
+  ],
+  updateStatus: [
+    reservationExists,
+    statusIsValid,
+    statusIsNotFinished,
+    statusBookedToCancelled,
+    updateStatus,
+  ],
 };
