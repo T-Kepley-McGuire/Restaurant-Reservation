@@ -12,6 +12,10 @@ button {
   margin: 5px;
 }
 
+a {
+  margin: 5px;
+}
+
 .btn-container {
   display: flex;
 }

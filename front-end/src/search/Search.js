@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 
 import "./Search.css";
-import { listReservations } from "../utils/api";
+import { cancelReservation, listReservations } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import ReservationList from "../reservationList/reservationList";
+import ReservationDisplay from "../reservations/ReservationDisplay";
 
 function Search() {
   const initialState = { mobile_number: "" };
@@ -35,6 +35,27 @@ function Search() {
 
     getReservations();
   };
+
+  const handleCancel = async (event, reservationId) => {
+    if (
+      !window.confirm(
+        "Do you want to cancel this reservatino? This cannot be undone."
+      )
+    )
+      return;
+    event.preventDefault();
+    const abortController = new AbortController();
+    try {
+      await cancelReservation(reservationId, abortController.signal);
+      const res = await listReservations(
+        { mobile_number: searchedNumber },
+        abortController.signal
+      );
+      await setReservations(res);
+    } catch (error) {
+      setReservationsError(error);
+    }
+  };
   return (
     <main className="col-m-7 m-2">
       <div className="row">
@@ -60,10 +81,14 @@ function Search() {
         </form>
       </div>
       <div className="row">
-        <ReservationList
+        <ReservationDisplay
+          reservations={reservations}
+          handleCancel={handleCancel}
+        />
+        {/* <ReservationList
           reservations={reservations}
           mobile_number={searchedNumber}
-        />
+        /> */}
       </div>
     </main>
   );

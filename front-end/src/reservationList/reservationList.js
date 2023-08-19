@@ -7,13 +7,10 @@ function ReservationList({ reservations, date, mobile_number }) {
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Mobile Number</th>
-            <th>Date</th>
             <th>Time</th>
+            <th>Customer Info</th>
             <th>Status</th>
-            <th>Seat Table</th>
-            <th>Edit</th>
+            <th>Options</th>
           </tr>
         </thead>
         <tbody>
@@ -22,6 +19,51 @@ function ReservationList({ reservations, date, mobile_number }) {
               return (
                 <tr key={index}>
                   <td>
+                    <p>{res.reservation_date}</p>
+                    <p>{formatAsTime(res.reservation_time)}</p>
+                  </td>
+                  <td>
+                    <p>
+                      <strong>
+                        {res.first_name} {res.last_name}
+                      </strong>
+                    </p>
+                    <p>{res.mobile_number}</p>
+                  </td>
+                  <td data-reservation-id-status={res.reservation_id}>
+                    <p>{res.status}</p>
+                    {res.status === "booked" ? (
+                      <a
+                        className="btn btn-primary"
+                        href={`/reservations/${res.reservation_id}/seat`}
+                      >
+                        Seat
+                      </a>
+                    ) : null}
+                  </td>
+                  <td>
+                    {/* {res.status === "booked" ? (
+                      <a
+                        className="btn btn-primary"
+                        href={`/reservations/${res.reservation_id}/seat`}
+                      >
+                        Seat
+                      </a>
+                    ) : null} */}
+                    <a
+                      className="btn btn-success"
+                      href={`/reservations/${res.reservation_id}/edit`}
+                    >
+                      Edit
+                    </a>
+                    <button
+                      className="btn btn-danger"
+                      data-reservation-id-cancel={reservations.reservation_id}
+                    >
+                      Cancel
+                    </button>
+                  </td>
+                  {/* <td>
                     {res.first_name} {res.last_name}
                   </td>
                   <td>{res.mobile_number}</td>
@@ -47,7 +89,7 @@ function ReservationList({ reservations, date, mobile_number }) {
                     >
                       Edit
                     </a>
-                  </td>
+                  </td> */}
                 </tr>
               );
             })

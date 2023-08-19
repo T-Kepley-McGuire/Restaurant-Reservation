@@ -1,16 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
 
-import "./Reservations.css";
-import {
-  dayOfWeek,
-  isInPast,
-  currentlyClosed,
-  formatAsDate,
-} from "../utils/date-time";
+import { postReservation } from "../utils/api";
 
-function Reservations({ reservation, method }) {
+import "./Reservations.css";
+import { dayOfWeek, isInPast, currentlyClosed } from "../utils/date-time";
+
+function ReservationForm(props) {
   const history = useHistory();
   const initialState = {};
   const initialErrorState = {
@@ -24,13 +21,6 @@ function Reservations({ reservation, method }) {
     ...initialErrorState,
   });
   const [postError, setPostError] = useState(null);
-
-  useEffect(() => {
-    if (reservation && reservation.reservation_date)
-      reservation.reservation_date = formatAsDate(reservation.reservation_date);
-
-    setFormData({ ...reservation });
-  }, [reservation]);
 
   const checkNumberOfPeople = (num) => {
     if (num < 1) {
@@ -102,11 +92,9 @@ function Reservations({ reservation, method }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     const abortController = new AbortController();
-    async function sendReservation() {
+    async function create() {
       try {
-        await setFormData({...formData, people: Number(formData.people)});
-        console.log(formData);
-        await method(formData, abortController.signal);
+        await postReservation(formData, abortController.signal);
         setFormData({ ...initialState }); // RESET FORM
         history.push("/dashboard");
       } catch (error) {
@@ -118,7 +106,7 @@ function Reservations({ reservation, method }) {
         ...validationChecks,
         peopleError: true,
       });
-    } else sendReservation();
+    } else create();
   };
 
   const handleCancel = () => {
@@ -126,12 +114,21 @@ function Reservations({ reservation, method }) {
   };
 
   return (
-    <>
+    <main className="col-m-7 m-2">
+      <div className="row">
+        <h2>THIS CREATES A NEW RESERVATION</h2>
+      </div>
+
       <ErrorAlert error={postError} />
       <ErrorAlert error={validationChecks.dayError} />
       <ErrorAlert error={validationChecks.reservationInPastError} />
       <ErrorAlert error={validationChecks.timeError} />
 
+      <ReservationForm
+        handleSubmit={handleSubmit}
+        handleCancel={handleCancel}
+        handleChange={handleChange}
+      />
       <div className="row">
         <div className="table form">
           <form className="form-group m-1" onSubmit={handleSubmit}>
@@ -240,8 +237,8 @@ function Reservations({ reservation, method }) {
           </form>
         </div>
       </div>
-    </>
+    </main>
   );
 }
 
-export default Reservations;
+export default ReservationForm;

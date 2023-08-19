@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { listReservations, listTables, removeReservation } from "../utils/api";
+import {
+  cancelReservation,
+  listReservations,
+  listTables,
+  removeReservation,
+} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import { formatAsTime, previous, today, next } from "../utils/date-time";
+import { previous, today, next } from "../utils/date-time";
 
 import "./Dashboard.css";
-import ReservationList from "../reservationList/reservationList";
+import ReservationDisplay from "../reservations/ReservationDisplay";
 
 /**
  * Defines the dashboard page.
@@ -26,6 +31,8 @@ function Dashboard({ date }) {
   const [tablesError, setTablesError] = useState(null);
 
   useEffect(loadDashboard, [date]);
+
+  useEffect(() => console.log("rerender"));
 
   function loadDashboard() {
     const abortController = new AbortController();
@@ -52,9 +59,29 @@ function Dashboard({ date }) {
       const abortController = new AbortController();
       await removeReservation(tableId, abortController.signal);
       listTables(abortController.signal).then(setTables).catch(setTablesError);
-      listReservations({date}, abortController.signal).then(setReservations).catch(setReservationsError);
+      listReservations({ date }, abortController.signal)
+        .then(setReservations)
+        .catch(setReservationsError);
     }
   }
+
+  const handleCancel = async (event, reservationId) => {
+    if (
+      !window.confirm(
+        "Do you want to cancel this reservatino? This cannot be undone."
+      )
+    )
+      return;
+    event.preventDefault();
+    const abortController = new AbortController();
+    try {
+      await cancelReservation(reservationId, abortController.signal);
+      const res = await listReservations({ date }, abortController.signal);
+      await setReservations(res);
+    } catch (error) {
+      setReservationsError(error);
+    }
+  };
 
   return (
     <main>
@@ -62,8 +89,30 @@ function Dashboard({ date }) {
       <div className="d-md-flex mb-3">
         <h4 className="mb-0">Reservations for date {date}</h4>
       </div>
+      <div className="btn-container navigate">
+        <button
+          onClick={() => moveDates(previous(date))}
+          className="btn btn-secondary"
+        >
+          Previous
+        </button>
+        <button onClick={() => moveDates(today())} className="btn btn-success">
+          Today
+        </button>
+        <button
+          onClick={() => moveDates(next(date))}
+          className="btn btn-primary"
+        >
+          Next
+        </button>
+      </div>
       <ErrorAlert error={reservationsError} />
-      <ReservationList reservations={reservations} date={date}/>
+      <ErrorAlert error={tablesError} />
+      <ReservationDisplay
+        reservations={reservations}
+        handleCancel={handleCancel}
+      />
+      {/* <ReservationList reservations={reservations} date={date}/> */}
       {/* <div className="table">
         <table>
           <thead>
@@ -111,23 +160,6 @@ function Dashboard({ date }) {
           </tbody>
         </table>
       </div> */}
-      <div className="btn-container navigate">
-        <button
-          onClick={() => moveDates(previous(date))}
-          className="btn btn-secondary"
-        >
-          Previous
-        </button>
-        <button onClick={() => moveDates(today())} className="btn btn-success">
-          Today
-        </button>
-        <button
-          onClick={() => moveDates(next(date))}
-          className="btn btn-primary"
-        >
-          Next
-        </button>
-      </div>
       <br />
       <div className="table">
         <table>
