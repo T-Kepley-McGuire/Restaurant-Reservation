@@ -29,6 +29,7 @@ describe("US-01 - Create and list reservations - E2E", () => {
 
   afterAll(async () => {
     await browser.close();
+    
   });
 
   describe("/reservations/new page", () => {
@@ -56,7 +57,8 @@ describe("US-01 - Create and list reservations - E2E", () => {
         path: ".screenshots/us-01-submit-after.png",
         fullPage: true,
       });
-
+      const expected = page.content();
+      console.log(expected, lastName);
       await expect(page).toMatch(lastName);
     });
 

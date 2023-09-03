@@ -104,11 +104,21 @@ function Reservations({ reservation, method }) {
     const abortController = new AbortController();
     async function sendReservation() {
       try {
-        await setFormData({...formData, people: Number(formData.people)});
-        console.log(formData);
-        await method(formData, abortController.signal);
-        setFormData({ ...initialState }); // RESET FORM
+        // console.log(
+        //   { ...formData, people: Number(formData.people) },
+        //   Number(formData.people)
+        // );
+        await setFormData({ ...formData, people: Number(formData.people) });
+        await method(
+          { ...formData, people: Number(formData.people) },
+          abortController.signal
+        );
+        await setFormData({ ...initialState });
         history.push("/dashboard");
+        // console.log(formData);
+        // await method(formData, abortController.signal);
+        // setFormData({ ...initialState }); // RESET FORM
+        //history.push("/dashboard");
       } catch (error) {
         await setPostError(error);
       }
