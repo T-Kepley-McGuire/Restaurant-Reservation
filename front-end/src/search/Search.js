@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "./Search.css";
 import { cancelReservation, listReservations } from "../utils/api";
@@ -21,25 +21,24 @@ function Search() {
     const abortController = new AbortController();
     async function getReservations() {
       try {
-        await listReservations(
+        const response = await listReservations(
           { mobile_number: formData.mobile_number },
           abortController.signal
-        )
-          .then(setReservations)
-          .then(() => setSearchedNumber(formData.mobile_number));
+        );
+        await setReservations(response);
+        await setSearchedNumber(formData.mobile_number);
         await setFormData({ ...initialState });
       } catch (error) {
         await setReservationsError(error);
       }
     }
-
     getReservations();
   };
 
   const handleCancel = async (event, reservationId) => {
     if (
       !window.confirm(
-        "Do you want to cancel this reservatino? This cannot be undone."
+        "Do you want to cancel this reservation? This cannot be undone."
       )
     )
       return;
@@ -80,16 +79,21 @@ function Search() {
           </div>
         </form>
       </div>
-      <div className="row">
-        <ReservationDisplay
-          reservations={reservations}
-          handleCancel={handleCancel}
-        />
-        {/* <ReservationList
+      {searchedNumber ? (
+        <>
+          <p>Results for: {searchedNumber}</p>
+          <div className="row">
+            <ReservationDisplay
+              reservations={reservations}
+              handleCancel={handleCancel}
+            />
+          </div>
+        </>
+      ) : null}
+      {/* <ReservationList
           reservations={reservations}
           mobile_number={searchedNumber}
         /> */}
-      </div>
     </main>
   );
 }

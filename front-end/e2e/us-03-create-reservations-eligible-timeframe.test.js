@@ -64,6 +64,8 @@ describe("US-03 - Create reservation on a future, working date - E2E", () => {
         path: ".screenshots/us-02-reservation-almost-closing-before.png",
       });
 
+      await console.log( await page.$(".alert-danger"));
+      await page.screenshot({path: ".screenshots/testing-03.png"});
       expect(await page.$(".alert-danger")).toBeFalsy();
 
       await page.click("button[type=submit]");

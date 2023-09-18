@@ -83,14 +83,14 @@ function Reservations({ reservation, method }) {
     if (target.name === "people" && target.value !== "") {
       checkNumberOfPeople(target.value);
     } else if (target.name === "reservation_date" && target.value !== "") {
-      checkIfInPast(target.value, formData.reservation_time);
-      checkDayOfWeek(target.value);
+      //checkIfInPast(target.value, formData.reservation_time);
+      //checkDayOfWeek(target.value);
     } else if (target.name === "reservation_time" && target.value !== "") {
-      checkIfInPast(
-        formData.reservation_date ? formData.reservation_date : "1970-01-01",
-        target.value
-      );
-      checkIfClosed(target.value);
+      // checkIfInPast(
+      //   formData.reservation_date ? formData.reservation_date : "1970-01-01",
+      //   target.value
+      // );
+      //checkIfClosed(target.value);
     }
 
     await setFormData({
@@ -108,13 +108,17 @@ function Reservations({ reservation, method }) {
         //   { ...formData, people: Number(formData.people) },
         //   Number(formData.people)
         // );
+        checkIfInPast(formData.reservation_date, formData.reservation_time);
+        checkIfClosed(formData.reservation_time);
+        checkDayOfWeek(formData.reservation_date);
         await setFormData({ ...formData, people: Number(formData.people) });
         await method(
           { ...formData, people: Number(formData.people) },
           abortController.signal
         );
+        const formDate = formData.reservation_date;
         await setFormData({ ...initialState });
-        history.push("/dashboard");
+        history.push(`/dashboard?date=${formDate}`);
         // console.log(formData);
         // await method(formData, abortController.signal);
         // setFormData({ ...initialState }); // RESET FORM

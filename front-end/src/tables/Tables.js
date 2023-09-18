@@ -33,6 +33,7 @@ function Tables() {
   };
 
   const checkCapacity = (num) => {
+    num = Number(num);
     if (num < 1) {
       setValidationChecks({
         ...validationChecks,
@@ -63,7 +64,7 @@ function Tables() {
     const abortController = new AbortController();
     async function create() {
       try {
-        await postTable(formData, abortController.signal);
+        await postTable({...formData, capacity: Number(formData.capacity)}, abortController.signal);
         setFormData({}); // RESET FORM
         history.push("/dashboard");
       } catch (error) {
@@ -79,7 +80,7 @@ function Tables() {
 
   return (
     <main className="col-m-7 m-2">
-      <h2>This makes a new table</h2>
+      <h2>Create new table</h2>
       <ErrorAlert error={postError} />
       <ErrorAlert error={validationChecks.nameError} />
       <ErrorAlert error={validationChecks.capacityError} />

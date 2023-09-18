@@ -42,7 +42,7 @@ function ReservationSeat() {
         console.log(error);
       }
     }
-
+    console.log(tables, reservationId);
     if (table) submit();
     else console.log("cannot submit without a table");
   };
@@ -79,7 +79,7 @@ function ReservationSeat() {
                         Please Choose...
                       </option>
                       {tables.map((table, index) => {
-                        return reservation.people <= table.capacity ? (
+                        return reservation.people <= table.capacity && !table.reservation_id ? (
                           <option key={index} value={table.table_id}>
                             {table.table_name} - {table.capacity}
                           </option>

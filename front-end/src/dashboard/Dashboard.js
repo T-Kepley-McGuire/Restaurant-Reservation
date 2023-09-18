@@ -31,8 +31,17 @@ function Dashboard({ date }) {
   const [tablesError, setTablesError] = useState(null);
 
   useEffect(loadDashboard, [date]);
+  
+  // useEffect(() => {
+    
+  //   async function waitThenQuery() {
+  //     await setTimeout(() => null, 1000);
+  //     const allButtons = await Array.from(document.querySelectorAll("[data-here]"));
+  //     console.log(allButtons);
+  //   }
 
-  useEffect(() => console.log("rerender"));
+  //   waitThenQuery();
+  // }, [])
 
   function loadDashboard() {
     const abortController = new AbortController();
@@ -68,7 +77,7 @@ function Dashboard({ date }) {
   const handleCancel = async (event, reservationId) => {
     if (
       !window.confirm(
-        "Do you want to cancel this reservatino? This cannot be undone."
+        "Do you want to cancel this reservation? This cannot be undone."
       )
     )
       return;
@@ -167,7 +176,8 @@ function Dashboard({ date }) {
             <tr>
               <th>Table</th>
               <th>Capacity</th>
-              <th>Occupied</th>
+              <th>Status</th>
+              <th>Options</th>
             </tr>
           </thead>
           <tbody>
@@ -179,16 +189,26 @@ function Dashboard({ date }) {
                     <td>{table.capacity}</td>
                     <td>
                       {table.reservation_id ? (
+                        <div data-table-id-status={table.table_id}>
+                          Occupied
+                        </div>
+                      ) : (
+                        <div data-table-id-status={table.table_id}>
+                          Free
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      {table.reservation_id ? (
                         <button
                           className="btn btn-primary"
                           data-table-id-finish={table.table_id}
+                          
                           onClick={() => unSeatTable(table.table_id)}
                         >
                           Finish
                         </button>
-                      ) : (
-                        "Available"
-                      )}
+                      ) : null}
                     </td>
                   </tr>
                 );

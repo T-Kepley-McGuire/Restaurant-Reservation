@@ -57,7 +57,6 @@ function allFieldsExist(req, ignore, next) {
       people,
     } = {},
   } = req.body;
-  console.log(req.body.data);
   if (
     first_name &&
     last_name &&
