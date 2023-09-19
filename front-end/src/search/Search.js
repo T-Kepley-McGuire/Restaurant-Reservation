@@ -90,10 +90,6 @@ function Search() {
           </div>
         </>
       ) : null}
-      {/* <ReservationList
-          reservations={reservations}
-          mobile_number={searchedNumber}
-        /> */}
     </main>
   );
 }

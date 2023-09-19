@@ -1,6 +1,5 @@
 const service = require("./tables.service");
 const reservationService = require("../reservations/reservations.service");
-// const { destroy } = require("../db/connection");
 
 function allFieldsExist(req, res, next) {
   const { data: { table_name, capacity } = {} } = req.body;

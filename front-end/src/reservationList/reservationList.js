@@ -42,14 +42,6 @@ function ReservationList({ reservations, date, mobile_number }) {
                     ) : null}
                   </td>
                   <td>
-                    {/* {res.status === "booked" ? (
-                      <a
-                        className="btn btn-primary"
-                        href={`/reservations/${res.reservation_id}/seat`}
-                      >
-                        Seat
-                      </a>
-                    ) : null} */}
                     <a
                       className="btn btn-success"
                       href={`/reservations/${res.reservation_id}/edit`}
@@ -63,33 +55,6 @@ function ReservationList({ reservations, date, mobile_number }) {
                       Cancel
                     </button>
                   </td>
-                  {/* <td>
-                    {res.first_name} {res.last_name}
-                  </td>
-                  <td>{res.mobile_number}</td>
-                  <td>{res.reservation_date}</td>
-                  <td>{formatAsTime(res.reservation_time)}</td>
-                  <td data-reservation-id-status={res.reservation_id}>
-                    {res.status}
-                  </td>
-                  <td>
-                    {res.status === "booked" ? (
-                      <a
-                        className="btn btn-primary"
-                        href={`/reservations/${res.reservation_id}/seat`}
-                      >
-                        Seat
-                      </a>
-                    ) : null}
-                  </td>
-                  <td className="btn-container">
-                    <a
-                      className="btn btn-success"
-                      href={`/reservations/${res.reservation_id}/edit`}
-                    >
-                      Edit
-                    </a>
-                  </td> */}
                 </tr>
               );
             })

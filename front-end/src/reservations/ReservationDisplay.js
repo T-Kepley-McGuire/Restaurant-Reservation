@@ -4,12 +4,6 @@ import { formatAsTime } from "../utils/date-time";
 import "./ReservationDisplay.css";
 
 function ReservationDisplay({ reservations, handleCancel }) {
-  // const handleCancel = (event, reservationId) => {
-  //     event.preventDefault();
-  //     const abortController = new AbortController();
-  //     cancelReservation(reservationId, abortController.signal);
-  // }
-
   return (
     <div className="card-container d-flex flex-wrap">
       {reservations.length ? (
