@@ -9,7 +9,7 @@ function Search() {
   const initialState = { mobile_number: "" };
   const [formData, setFormData] = useState({ ...initialState });
   const [reservationsError, setReservationsError] = useState(null);
-  const [searchedNumber, setSearchedNumber] = useState("");
+  const [searchedNumber, setSearchedNumber] = useState(null);
   const [reservations, setReservations] = useState([]);
 
   const handleChange = async ({ target }) => {
@@ -25,6 +25,7 @@ function Search() {
           { mobile_number: formData.mobile_number },
           abortController.signal
         );
+        console.log(response);
         await setReservations(response);
         await setSearchedNumber(formData.mobile_number);
         await setFormData({ ...initialState });
@@ -79,7 +80,7 @@ function Search() {
           </div>
         </form>
       </div>
-      {searchedNumber ? (
+      {true ? (
         <>
           <p>Results for: {searchedNumber}</p>
           <div className="row">
