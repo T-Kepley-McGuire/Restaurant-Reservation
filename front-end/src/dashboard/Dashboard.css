@@ -1,3 +1,6 @@
+/* 
+ * Custom sizing for table
+*/
 th:nth-child(1),
 td:nth-child(1) {
   width: auto;

@@ -1,6 +1,16 @@
 import React from "react";
 import { formatAsTime } from "../utils/date-time";
 
+
+/**
+ * Displays a list of reservations. Depreciated
+ * @param {Array} reservations 
+ * the list of reservations to display
+ * @param {String} date
+ * @param {String} mobile_number
+ * Whether to sort by date or by mobile number
+ * @returns {JSX.Element}
+ */
 function ReservationList({ reservations, date, mobile_number }) {
   return (
     <div className="table">
@@ -76,5 +86,3 @@ function ReservationList({ reservations, date, mobile_number }) {
     </div>
   );
 }
-
-export default ReservationList;

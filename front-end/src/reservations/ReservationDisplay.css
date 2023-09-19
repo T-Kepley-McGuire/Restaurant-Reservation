@@ -2,21 +2,11 @@
     width: 300px;
 }
 
-span {
-    /* display: none; */
-}
-
 i {
     vertical-align: middle;
 }
 
-.overlay {
-    position: absolute;
-    inset: 0px;
-    z-index: 4;
-}
-
-.on-top {
-    display: flex;
-    z-index: 2000;
+.note {
+    font-size: small;
+    color: gray;
 }

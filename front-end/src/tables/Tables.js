@@ -4,8 +4,13 @@ import { useHistory } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
 import { postTable } from "../utils/api";
 
+/**
+ * Displays a form for creating a new table
+ * @returns {JSX.Element}
+ */
 function Tables() {
-  const history = useHistory();
+  // Save error state so that form may not be submitted when erronious 
+  // and user knows what the problem is
   const initialErrorState = {
     nameError: false,
     capacityError: false,
@@ -48,6 +53,7 @@ function Tables() {
   };
 
   const handleChange = async ({ target }) => {
+    // Obv check for errors while user is entering data
     if (target.name === "table_name" && target.value !== "") {
       checkNameLength(target.value);
     } else if (target.name === "capacity" && target.value !== "") {
@@ -59,12 +65,16 @@ function Tables() {
     });
   };
 
+  const history = useHistory();
   const handleSubmit = (event) => {
     event.preventDefault();
     const abortController = new AbortController();
     async function create() {
       try {
-        await postTable({...formData, capacity: Number(formData.capacity)}, abortController.signal);
+        await postTable(
+          { ...formData, capacity: Number(formData.capacity) },
+          abortController.signal
+        );
         setFormData({}); // RESET FORM
         history.push("/dashboard");
       } catch (error) {

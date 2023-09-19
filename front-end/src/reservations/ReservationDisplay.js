@@ -1,9 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { formatAsTime } from "../utils/date-time";
 
 import "./ReservationDisplay.css";
 
-function ReservationDisplay({ reservations, handleCancel }) {
+
+/**
+ * Displays a page for viewing a list of reservations
+ * @param {Array} reservations
+ * An array of reservations to display
+ * @param {Function} handleCancel
+ * A function that handles the behavior of cancelling a reservation 
+ * @returns 
+ */
+function ReservationDisplay({ reservations, handleReservationCancel }) {
   return (
     <div className="card-container d-flex flex-wrap">
       {reservations.length ? (
@@ -28,12 +37,12 @@ function ReservationDisplay({ reservations, handleCancel }) {
                 {res.status === "booked" ? (
                   <>
                     <a
-                      className="btn btn-primary on-top"
+                      className="btn btn-primary"
                       href={`/reservations/${res.reservation_id}/seat`}
                     >
                       Seat
                     </a>
-                    <div className="ml-auto on-top">
+                    <div className="ml-auto">
                       <a
                         className={`btn btn-success ${
                           res.status === "booked" ? "" : "disabled"
@@ -49,7 +58,7 @@ function ReservationDisplay({ reservations, handleCancel }) {
                           res.status === "booked" ? "" : "disabled"
                         }`}
                         onClick={(event) =>
-                          handleCancel(event, res.reservation_id)
+                          handleReservationCancel(event, res.reservation_id)
                         }
                       >
                         <i className="material-icons">cancel</i>
@@ -57,14 +66,8 @@ function ReservationDisplay({ reservations, handleCancel }) {
                       </button>
                     </div>
                   </>
-                ) : null}
+                ) : <p className="note">Finalized reservations may not be altered</p>}
               </div>
-              {res.status === "booked" ? (
-                <a
-                  className="overlay"
-                  href={`/reservations/${res.reservation_id}/edit`}
-                />
-              ) : null}
             </div>
           );
         })

@@ -10,16 +10,26 @@ import {
   formatAsDate,
 } from "../utils/date-time";
 
-function Reservations({ reservation, method }) {
-  const history = useHistory();
+
+/**
+ * Displays a page for editing or creating a new reservation
+ * @param {Object} reservation
+ * An object containing reservation data.
+ * @param {Function} method
+ * A function that takes form data and sends it to the server. May either be post or put
+ * @returns {JSX.Element}
+ */
+function Reservations({ reservation, method }) {  
   const initialState = {};
+  const [formData, setFormData] = useState({ ...initialState });
+  
+  // Hold error states to help with form validation
   const initialErrorState = {
     dayError: false,
     peopleError: false,
     reservationInPastError: false,
     timeError: false,
   };
-  const [formData, setFormData] = useState({ ...initialState });
   const [validationChecks, setValidationChecks] = useState({
     ...initialErrorState,
   });
@@ -82,16 +92,7 @@ function Reservations({ reservation, method }) {
   const handleChange = async ({ target }) => {
     if (target.name === "people" && target.value !== "") {
       checkNumberOfPeople(target.value);
-    } // else if (target.name === "reservation_date" && target.value !== "") {
-    //   //checkIfInPast(target.value, formData.reservation_time);
-    //   //checkDayOfWeek(target.value);
-    // } else if (target.name === "reservation_time" && target.value !== "") {
-    //   // checkIfInPast(
-    //   //   formData.reservation_date ? formData.reservation_date : "1970-01-01",
-    //   //   target.value
-    //   // );
-    //   //checkIfClosed(target.value);
-    // }
+    } 
 
     await setFormData({
       ...formData,
@@ -99,6 +100,7 @@ function Reservations({ reservation, method }) {
     });
   };
 
+  const history = useHistory();
   const handleSubmit = (event) => {
     event.preventDefault();
     const abortController = new AbortController();
@@ -107,11 +109,12 @@ function Reservations({ reservation, method }) {
         checkIfInPast(formData.reservation_date, formData.reservation_time);
         checkIfClosed(formData.reservation_time);
         checkDayOfWeek(formData.reservation_date);
-        await setFormData({ ...formData, people: Number(formData.people) });
+        // Convert people to number. Idk if this is really necessary since it happens on the backend too
         await method(
           { ...formData, people: Number(formData.people) },
           abortController.signal
         );
+        // Save date for pushing history
         const formDate = formData.reservation_date;
         await setFormData({ ...initialState });
         history.push(`/dashboard?date=${formDate}`);

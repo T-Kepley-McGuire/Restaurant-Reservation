@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from "react";
-import Reservations from "./Reservations";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min";
+
 import {
   getReservation,
   updateReservation,
 } from "../utils/api";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min";
+import Reservations from "./Reservations";
 
+/**
+ * Displays a page for editing a reservation
+ * @returns {JSX.Element}
+ */
 function ReservationEdit() {
   const [reservation, setReservation] = useState({});
   const { reservationId } = useParams();
+
+  // Load reservation on page load
   useEffect(() => {
     async function loadReservation() {
       try {
@@ -21,11 +28,11 @@ function ReservationEdit() {
     }
 
     loadReservation();
-  }, []);
+  }, [reservationId]);
   return (
     <main className="col-m-7 m-2">
       <div className="row">
-        <h2>THIS EDITS A RESERVATION</h2>
+        <h2>Edit Reservation</h2>
       </div>
       <Reservations
         reservation={reservation}

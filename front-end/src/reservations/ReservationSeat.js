@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import { getReservation, listTables, seatReservation } from "../utils/api";
 
+import { getReservation, listTables, seatReservation } from "../utils/api";
 import "./ReservationSeat.css";
 
+/**
+ * Displays a page for seating a reservation
+ * @returns {JSX.Element}
+ */
 function ReservationSeat() {
   const history = useHistory();
   const { reservationId } = useParams();
 
+  // Save current table selected to ensure user does not seat at non-existent table
   const [table, setTable] = useState(undefined);
   const [tables, setTables] = useState([]);
   const [reservation, setReservation] = useState({});
+
+  // Load reservation on page load
   useEffect(() => {
     const abortController = new AbortController();
 
@@ -20,11 +27,11 @@ function ReservationSeat() {
     listTables(abortController.signal).then(setTables).catch(console.error);
 
     return () => abortController.abort();
-  }, []);
-  
-    const handleChange = async ({ target }) => {
-      await setTable(target.value);
-    };
+  }, [reservationId]);
+
+  const handleChange = async ({ target }) => {
+    await setTable(target.value);
+  };
 
   const handleCancel = () => {
     history.goBack();
@@ -78,7 +85,8 @@ function ReservationSeat() {
                         Please Choose...
                       </option>
                       {tables.map((table, index) => {
-                        return reservation.people <= table.capacity && !table.reservation_id ? (
+                        return reservation.people <= table.capacity &&
+                          !table.reservation_id ? (
                           <option key={index} value={table.table_id}>
                             {table.table_name} - {table.capacity}
                           </option>

@@ -7,7 +7,11 @@ import { postReservation } from "../utils/api";
 import "./Reservations.css";
 import { dayOfWeek, isInPast, currentlyClosed } from "../utils/date-time";
 
-function ReservationForm(props) {
+/**
+ * Displays a page for creating or editing a reservation. Depreciated
+ * @returns {JSX.Element}
+ */
+function ReservationForm() {
   const history = useHistory();
   const initialState = {};
   const initialErrorState = {
@@ -240,5 +244,3 @@ function ReservationForm(props) {
     </main>
   );
 }
-
-export default ReservationForm;

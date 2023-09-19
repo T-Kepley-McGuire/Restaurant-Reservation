@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+
+import ErrorAlert from "../layout/ErrorAlert";
 import {
   cancelReservation,
   listReservations,
   listTables,
   removeReservation,
 } from "../utils/api";
-import ErrorAlert from "../layout/ErrorAlert";
 import { previous, today, next } from "../utils/date-time";
-
-import "./Dashboard.css";
 import ReservationDisplay from "../reservations/ReservationDisplay";
+import "./Dashboard.css";
+
 
 /**
  * Defines the dashboard page.
@@ -20,33 +21,36 @@ import ReservationDisplay from "../reservations/ReservationDisplay";
  */
 function Dashboard({ date }) {
 
-  const history = useHistory();
-
+  
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
-
+  
   const [tables, setTables] = useState([]);
   const [tablesError, setTablesError] = useState(null);
-
+  
   useEffect(loadDashboard, [date]);
-
+  
   function loadDashboard() {
     const abortController = new AbortController();
     setReservationsError(null);
     listReservations({ date }, abortController.signal)
-      .then(setReservations)
-      .catch(setReservationsError);
-
+    .then(setReservations)
+    .catch(setReservationsError);
+    
     listTables(abortController.signal).then(setTables).catch(setTablesError);
-
+    
     return () => abortController.abort();
   }
-
+  
+  // Function to change url to new date
+  const history = useHistory();
   function moveDates(toDate) {
     history.push(`/dashboard?date=${toDate}`);
   }
 
+  // Function to remove a reservation from a table
   async function unSeatTable(tableId) {
+    // Early return if user does not want to unseaet table
     if (
       window.confirm(
         "Is this table ready to seat new guests? This cannot be undone."
@@ -61,7 +65,9 @@ function Dashboard({ date }) {
     }
   }
 
-  const handleCancel = async (event, reservationId) => {
+  // Function to cancel a reservation
+  async function handleReservationCancel(event, reservationId) {
+    // Early return if user does not want to cancel
     if (
       !window.confirm(
         "Do you want to cancel this reservation? This cannot be undone."
@@ -106,7 +112,7 @@ function Dashboard({ date }) {
       <ErrorAlert error={tablesError} />
       <ReservationDisplay
         reservations={reservations}
-        handleCancel={handleCancel}
+        handleReservationCancel={handleReservationCancel}
       />
       <br />
       <div className="table">

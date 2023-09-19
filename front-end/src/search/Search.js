@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-import "./Search.css";
-import { cancelReservation, listReservations } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
+import { cancelReservation, listReservations } from "../utils/api";
 import ReservationDisplay from "../reservations/ReservationDisplay";
+import "./Search.css";
 
+/**
+ * Displays a page for searching for reservations according to phone number
+ * @returns {JSX.Element}
+ */
 function Search() {
   const initialState = { mobile_number: "" };
   const [formData, setFormData] = useState({ ...initialState });
   const [reservationsError, setReservationsError] = useState(null);
+  // Save searched number to check if the user has actually entered the search bar
+  // and to be able to re-update reservation list after cancellations
   const [searchedNumber, setSearchedNumber] = useState(null);
   const [reservations, setReservations] = useState([]);
 
@@ -16,6 +22,7 @@ function Search() {
     await setFormData({ ...formData, [target.name]: target.value });
   };
 
+  // For some reason this is the most finiky effect ever
   const handleSubmit = (event) => {
     event.preventDefault();
     const abortController = new AbortController();
@@ -35,7 +42,8 @@ function Search() {
     getReservations();
   };
 
-  const handleCancel = async (event, reservationId) => {
+  const handleReservationCancel = async (event, reservationId) => {
+    // Early return if user does not want to cancel reservation
     if (
       !window.confirm(
         "Do you want to cancel this reservation? This cannot be undone."
@@ -46,6 +54,7 @@ function Search() {
     const abortController = new AbortController();
     try {
       await cancelReservation(reservationId, abortController.signal);
+      // Update list after cancelling reservations
       const res = await listReservations(
         { mobile_number: searchedNumber },
         abortController.signal
@@ -85,7 +94,7 @@ function Search() {
           <div className="row">
             <ReservationDisplay
               reservations={reservations}
-              handleCancel={handleCancel}
+              handleReservationCancel={handleReservationCancel}
             />
           </div>
         </>
