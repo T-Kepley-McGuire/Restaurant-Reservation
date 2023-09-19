@@ -1,5 +1,11 @@
 const service = require("./tables.service");
 const reservationService = require("../reservations/reservations.service");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+
+function dataExists(req, res, next) {
+  if (req.body.data) return next();
+  next({ status: 400, message: `Missing data` });
+}
 
 function allFieldsExist(req, res, next) {
   const { data: { table_name, capacity } = {} } = req.body;
@@ -31,6 +37,17 @@ function tableIsOccupied(req, res, next) {
   });
 }
 
+async function tableIsFree(req, res, next) {
+  const table_id = Number(req.params.table_id);
+  const table = await service.read(table_id);
+  res.locals.table = table;
+  if (!table.reservation_id) return next();
+  next({
+    status: 400,
+    message: `Table is already occupied`,
+  });
+}
+
 function tableNameLongerThanTwo(req, res, next) {
   const { table_name } = req.body.data;
   if (table_name.length >= 2) return next();
@@ -41,18 +58,13 @@ function tableNameLongerThanTwo(req, res, next) {
   });
 }
 
-function dataExists(req, res, next) {
-  if (req.body.data) return next();
-  next({ status: 400, message: `Missing data` });
-}
-
 function reservationIdExists(req, res, next) {
   const { reservation_id } = req.body.data;
   if (reservation_id) return next();
   next({ status: 400, message: `Missing reservation_id` });
 }
 
-async function validReservation(req, res, next) {
+async function reservationIsValid(req, res, next) {
   const { reservation_id } = req.body.data;
   const reservation = await reservationService.read(reservation_id);
   res.locals.reservation = reservation;
@@ -63,14 +75,11 @@ async function validReservation(req, res, next) {
   });
 }
 
-async function tableIsFree(req, res, next) {
-  const table_id = Number(req.params.table_id);
-  const table = await service.read(table_id);
-  res.locals.table = table;
-  if (!table.reservation_id) return next();
+function reservationNotSeated(req, res, next) {
+  if (res.locals.reservation.status === "booked") return next();
   next({
     status: 400,
-    message: `Table is already occupied`,
+    message: `Reservation may not be seated if already ${res.locals.reservation.status}`,
   });
 }
 
@@ -87,22 +96,6 @@ function reservationLessThanCapacity(req, res, next) {
   });
 }
 
-function capacityIsNumber(req, res, next) {
-  const { capacity } = req.body.data;
-  if (typeof capacity === "number") return next();
-  next({
-    status: 400,
-    message: `capacity must be a number`,
-  });
-}
-
-function reservationNotSeated(req, res, next) {
-  if (res.locals.reservation.status === "booked") return next();
-  next({
-    status: 400,
-    message: `Reservation may not be already seated`,
-  });
-}
 function updateResConfig(status) {
   return async function updateReservation(req, res, next) {
     const reservationId = res.locals.reservation
@@ -111,6 +104,15 @@ function updateResConfig(status) {
     await reservationService.updateStatus(reservationId, status);
     next();
   };
+}
+
+function capacityIsNumber(req, res, next) {
+  const { capacity } = req.body.data;
+  if (typeof capacity === "number") return next();
+  next({
+    status: 400,
+    message: `capacity must be a number`,
+  });
 }
 
 async function list(req, res, next) {
@@ -137,17 +139,27 @@ async function destroy(req, res, next) {
 }
 
 module.exports = {
-  list: [list],
+  list: [asyncErrorBoundary(list)],
   update: [
     dataExists,
     reservationIdExists,
-    validReservation,
-    tableIsFree,
+    asyncErrorBoundary(reservationIsValid),
+    asyncErrorBoundary(tableIsFree),
     reservationLessThanCapacity,
     reservationNotSeated,
-    updateResConfig("seated"),
-    update,
+    asyncErrorBoundary(updateResConfig("seated")),
+    asyncErrorBoundary(update),
   ],
-  post: [allFieldsExist, tableNameLongerThanTwo, capacityIsNumber, post],
-  delete: [tableExists, tableIsOccupied, updateResConfig("finished"), destroy],
+  post: [
+    allFieldsExist,
+    tableNameLongerThanTwo,
+    capacityIsNumber,
+    asyncErrorBoundary(post),
+  ],
+  delete: [
+    asyncErrorBoundary(tableExists),
+    tableIsOccupied,
+    asyncErrorBoundary(updateResConfig("finished")),
+    asyncErrorBoundary(destroy),
+  ],
 };

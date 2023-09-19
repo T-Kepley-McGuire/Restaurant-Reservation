@@ -127,9 +127,9 @@ function Dashboard({ date }) {
           </thead>
           <tbody>
             {tables.length ? (
-              tables.map((table, index) => {
+              tables.map((table) => {
                 return (
-                  <tr key={index}>
+                  <tr key={table.table_id}>
                     <td>{table.table_name}</td>
                     <td>{table.capacity}</td>
                     <td>

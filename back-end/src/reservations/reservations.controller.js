@@ -1,6 +1,5 @@
-/**
- * List handler for reservation resources
- */
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+
 const service = require("./reservations.service");
 
 async function reservationExists(req, res, next) {
@@ -15,35 +14,12 @@ async function reservationExists(req, res, next) {
   });
 }
 
-function hasDateOrNumber(req, res, next) {
-  if (
-    req.query.date ||
-    req.query.mobile_number ||
-    req.query.mobile_number === ""
-  )
-    return next();
+function reservationIsEditable(req, res, next) {
+  if (res.locals.reservation.status === "booked") return next();
   next({
     status: 400,
-    message: `Please supply a ${req.query.date ? "mobile_number" : "date"}`,
+    message: `Reservation may only be edited if it is still booked`,
   });
-}
-
-function isCurrentlyOpen(req, res, next) {
-  const { reservation_time: time } = req.body.data;
-  let [hour, minute] = time.split(":");
-  hour = Number(hour);
-  mintue = Number(minute);
-  if (
-    (hour === 10 && minute < 30) ||
-    hour < 10 ||
-    (hour === 21 && minute > 30) ||
-    hour > 21
-  )
-    return next({
-      status: 400,
-      message: `Reservations are not open for time ${time}`,
-    });
-  next();
 }
 
 function allFieldsExist(req, ignore, next) {
@@ -84,6 +60,37 @@ function allFieldsExist(req, ignore, next) {
   });
 }
 
+function hasDateOrNumber(req, res, next) {
+  if (
+    req.query.date ||
+    req.query.mobile_number ||
+    req.query.mobile_number === ""
+  )
+    return next();
+  next({
+    status: 400,
+    message: `Please supply a ${req.query.date ? "mobile_number" : "date"}`,
+  });
+}
+
+function isCurrentlyOpen(req, res, next) {
+  const { reservation_time: time } = req.body.data;
+  let [hour, minute] = time.split(":");
+  hour = Number(hour);
+  mintue = Number(minute);
+  if (
+    (hour === 10 && minute < 30) ||
+    hour < 10 ||
+    (hour === 21 && minute > 30) ||
+    hour > 21
+  )
+    return next({
+      status: 400,
+      message: `Reservations are not open for time ${time}`,
+    });
+  next();
+}
+
 function dateIsValidDate(req, res, next) {
   const { reservation_date } = req.body.data;
   let date = new convertToDate(reservation_date);
@@ -91,16 +98,6 @@ function dateIsValidDate(req, res, next) {
   next({
     status: 400,
     message: `reservation_date must be date`,
-  });
-}
-
-function timeIsValidTime(req, res, next) {
-  const { reservation_time } = req.body.data;
-  let time = Date.parse(`01 Jan 1970 ${reservation_time}`);
-  if (!Number.isNaN(time)) return next();
-  next({
-    status: 400,
-    message: `reservation_time must be time`,
   });
 }
 
@@ -119,18 +116,28 @@ function dateNotInPast(req, res, next) {
   });
 }
 
+function dateNotTuesday(req, res, next) {
+  const { reservation_date: date } = req.body.data;
+  if (convertToDate(date).getDay() !== 2) return next();
+  next({
+    status: 400,
+    message: `Reservation must be made for a day that the restaurant is open`,
+  });
+}
+
 function convertToDate(date) {
   let [year, month, day] = date.split("-");
   month -= 1;
   return new Date(year, month, day);
 }
 
-function dateNotTuesday(req, res, next) {
-  const { reservation_date: date } = req.body.data;
-  if (convertToDate(date).getDay() !== 2) return next();
+function timeIsValidTime(req, res, next) {
+  const { reservation_time } = req.body.data;
+  let time = Date.parse(`01 Jan 1970 ${reservation_time}`);
+  if (!Number.isNaN(time)) return next();
   next({
     status: 400,
-    message: `Reservation must be for open day. not closed lol`,
+    message: `reservation_time must be time`,
   });
 }
 
@@ -180,7 +187,11 @@ function statusIsNotFinished(req, res, next) {
 }
 
 function statusBookedToCancelled(req, res, next) {
-  if (req.body.data.status !== "cancelled" || res.locals.reservation.status === "booked") return next();
+  if (
+    req.body.data.status !== "cancelled" ||
+    res.locals.reservation.status === "booked"
+  )
+    return next();
   next({
     status: 400,
     message: `Only reservations that are currently 'booked' may be cancelled`,
@@ -222,8 +233,8 @@ async function updateStatus(req, res, next) {
 }
 
 module.exports = {
-  list: [hasDateOrNumber, list],
-  read: [reservationExists, read],
+  list: [hasDateOrNumber, asyncErrorBoundary(list)],
+  read: [asyncErrorBoundary(reservationExists), asyncErrorBoundary(read)],
   post: [
     allFieldsExist,
     dateIsValidDate,
@@ -234,22 +245,23 @@ module.exports = {
     peopleIsANumber,
     peopleAboveZero,
     statusIsBooked,
-    post,
+    asyncErrorBoundary(post),
   ],
   update: [
-    reservationExists,
+    asyncErrorBoundary(reservationExists),
+    reservationIsEditable,
     allFieldsExist,
     dateIsValidDate,
     timeIsValidTime,
     peopleIsANumber,
     peopleAboveZero,
-    update,
+    asyncErrorBoundary(update),
   ],
   updateStatus: [
-    reservationExists,
+    asyncErrorBoundary(reservationExists),
     statusIsValid,
     statusIsNotFinished,
     statusBookedToCancelled,
-    updateStatus,
+    asyncErrorBoundary(updateStatus),
   ],
 };
