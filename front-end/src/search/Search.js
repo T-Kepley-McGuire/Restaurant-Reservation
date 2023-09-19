@@ -25,7 +25,6 @@ function Search() {
           { mobile_number: formData.mobile_number },
           abortController.signal
         );
-        console.log(response);
         await setReservations(response);
         await setSearchedNumber(formData.mobile_number);
         await setFormData({ ...initialState });

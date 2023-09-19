@@ -31,17 +31,6 @@ function Dashboard({ date }) {
   const [tablesError, setTablesError] = useState(null);
 
   useEffect(loadDashboard, [date]);
-  
-  // useEffect(() => {
-    
-  //   async function waitThenQuery() {
-  //     await setTimeout(() => null, 1000);
-  //     const allButtons = await Array.from(document.querySelectorAll("[data-here]"));
-  //     console.log(allButtons);
-  //   }
-
-  //   waitThenQuery();
-  // }, [])
 
   function loadDashboard() {
     const abortController = new AbortController();

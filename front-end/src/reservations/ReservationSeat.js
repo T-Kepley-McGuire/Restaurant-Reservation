@@ -16,8 +16,8 @@ function ReservationSeat() {
 
     getReservation(reservationId, abortController.signal)
       .then(setReservation)
-      .catch(console.log);
-    listTables(abortController.signal).then(setTables).catch(console.log);
+      .catch(console.error);
+    listTables(abortController.signal).then(setTables).catch(console.error);
 
     return () => abortController.abort();
   }, []);
@@ -39,12 +39,11 @@ function ReservationSeat() {
         setTable(undefined);
         history.push("/dashboard");
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
-    console.log(tables, reservationId);
     if (table) submit();
-    else console.log("cannot submit without a table");
+    else console.error("cannot submit without a table");
   };
 
   return (

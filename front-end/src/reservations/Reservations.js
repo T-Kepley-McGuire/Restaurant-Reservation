@@ -104,10 +104,6 @@ function Reservations({ reservation, method }) {
     const abortController = new AbortController();
     async function sendReservation() {
       try {
-        // console.log(
-        //   { ...formData, people: Number(formData.people) },
-        //   Number(formData.people)
-        // );
         checkIfInPast(formData.reservation_date, formData.reservation_time);
         checkIfClosed(formData.reservation_time);
         checkDayOfWeek(formData.reservation_date);
@@ -119,10 +115,6 @@ function Reservations({ reservation, method }) {
         const formDate = formData.reservation_date;
         await setFormData({ ...initialState });
         history.push(`/dashboard?date=${formDate}`);
-        // console.log(formData);
-        // await method(formData, abortController.signal);
-        // setFormData({ ...initialState }); // RESET FORM
-        //history.push("/dashboard");
       } catch (error) {
         await setPostError(error);
       }
