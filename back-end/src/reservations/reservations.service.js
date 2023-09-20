@@ -1,5 +1,10 @@
 const knex = require("../db/connection");
 
+/**
+ * Returns a list of reservations filtered by date
+ * @param {Date} date 
+ * @returns {Promise}
+ */
 function listDate(date) {
   return knex("reservations")
     .select("*")
@@ -8,6 +13,11 @@ function listDate(date) {
     .orderBy("reservation_time");
 }
 
+/**
+ * Returns a list of reservations filtered by mobile_number
+ * @param {String} number 
+ * @returns {Promise}
+ */
 function listNumber(number) {
   return knex("reservations")
     .select("*")
@@ -15,6 +25,11 @@ function listNumber(number) {
     .orderBy("reservation_time");
 }
 
+/**
+ * Returns a single reservation matching reservationId
+ * @param {Number} reservationId 
+ * @returns {Promise}
+ */
 function read(reservationId) {
   return knex("reservations")
     .select("*")
@@ -22,6 +37,11 @@ function read(reservationId) {
     .first();
 }
 
+/**
+ * Creates a new reservation and returns a copy
+ * @param {Object} data 
+ * @returns {Promise}
+ */
 function post(data) {
   return knex("reservations")
     .insert(data)
@@ -29,6 +49,13 @@ function post(data) {
     .then((created) => created[0]);
 }
 
+/**
+ * Updates a reservation matching reservation Id and
+ * returns a copy of updated reservation
+ * @param {Number} reservationId 
+ * @param {Object} updatedInfo 
+ * @returns {Promise}
+ */
 function update(reservationId, updatedInfo) {
   return knex("reservations")
     .returning("*")
@@ -36,6 +63,13 @@ function update(reservationId, updatedInfo) {
     .update(updatedInfo);
 }
 
+/**
+ * Updates status of reservation matching reservationId
+ * and returns a copy of updated status
+ * @param {Number} reservationId 
+ * @param {String} status 
+ * @returns {Promise}
+ */
 function updateStatus(reservationId, status) {
   return knex("reservations")
     .returning("*")
