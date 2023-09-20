@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 
+import ErrorAlert from "../layout/ErrorAlert";
 import { getReservation, listTables, seatReservation } from "../utils/api";
 import "./ReservationSeat.css";
 
@@ -16,6 +17,7 @@ function ReservationSeat() {
   const [table, setTable] = useState(undefined);
   const [tables, setTables] = useState([]);
   const [reservation, setReservation] = useState({});
+  const [seatingError, setSeatingError] = useState(false);
 
   // Load reservation on page load
   useEffect(() => {
@@ -37,6 +39,7 @@ function ReservationSeat() {
     history.goBack();
   };
 
+  // Submit seating assignemnt, but only if table is selected. Check for status errors
   const handleSubmit = (event) => {
     event.preventDefault();
     const abortController = new AbortController();
@@ -46,17 +49,25 @@ function ReservationSeat() {
         setTable(undefined);
         history.push("/dashboard");
       } catch (error) {
+        await setSeatingError(error);
         console.error(error);
       }
     }
     if (table) submit();
-    else console.error("cannot submit without a table");
+    else {
+      const error = {message: "cannot submit without a table"};
+      setSeatingError(error);
+      console.error(error);
+    }
   };
 
   return (
     <main className="col-m-7 m-2">
       <div className="row">
         <h2>Seat Reservation {reservationId}</h2>
+      </div>
+      <div className="row">
+        <ErrorAlert error={seatingError} />
       </div>
       <div className="row">
         <p>Reservation size: {reservation.people}</p>
