@@ -7,7 +7,7 @@ const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
 const onPageConsole = (msg) =>
   Promise.all(msg.args().map((event) => event.jsonValue())).then((eventJson) =>
-    console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
+    null//console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
   );
 
 describe("US-07 - Search reservations - E2E", () => {
@@ -41,7 +41,7 @@ describe("US-07 - Search reservations - E2E", () => {
       });
 
       await Promise.all([
-        page.click("button[type=submit]").then(console.log("clicked")),
+        page.click("button[type=submit]"),
         page.waitForResponse((response) => {
           response.url().includes("mobile_number=");
           return response;

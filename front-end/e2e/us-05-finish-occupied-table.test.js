@@ -10,7 +10,7 @@ const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
 const onPageConsole = (msg) =>
   Promise.all(msg.args().map((event) => event.jsonValue())).then((eventJson) =>
-    console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
+    null//console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
   );
 
 describe("US-05 - Finish an occupied table - E2E", () => {
@@ -61,7 +61,7 @@ describe("US-05 - Finish an occupied table - E2E", () => {
         path: ".screenshots/us-05-dashboard-finish-button-before.png",
         fullPage: true,
       });
-      console.log(`[data-table-id-status="${table.table_id}"]`);
+      //console.log(`[data-table-id-status="${table.table_id}"]`);
       const containsOccupied = await containsText(
         page,
         `[data-table-id-status="${table.table_id}"]`,

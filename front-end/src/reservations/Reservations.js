@@ -10,7 +10,6 @@ import {
   formatAsDate,
 } from "../utils/date-time";
 
-
 /**
  * Displays a page for editing or creating a new reservation
  * @param {Object} reservation
@@ -19,10 +18,10 @@ import {
  * A function that takes form data and sends it to the server. May either be post or put
  * @returns {JSX.Element}
  */
-function Reservations({ reservation, method }) {  
+function Reservations({ reservation, method }) {
   const initialState = {};
   const [formData, setFormData] = useState({ ...initialState });
-  
+
   // Hold error states to help with form validation
   const initialErrorState = {
     dayError: false,
@@ -89,15 +88,26 @@ function Reservations({ reservation, method }) {
     }));
   };
 
+  const checkIfAllValidCharacters = (phoneNumber) => {
+    if (/.*[^\d-].*/.test(phoneNumber)) {
+      return false;
+    }
+    return true;
+  };
+
   const handleChange = async ({ target }) => {
     if (target.name === "people" && target.value !== "") {
       checkNumberOfPeople(target.value);
-    } 
-
-    await setFormData({
-      ...formData,
-      [target.name]: target.value,
-    });
+    }
+    if (
+      target.name !== "mobile_number" ||
+      checkIfAllValidCharacters(target.value)
+    ) {
+      await setFormData({
+        ...formData,
+        [target.name]: target.value,
+      });
+    }
   };
 
   const history = useHistory();

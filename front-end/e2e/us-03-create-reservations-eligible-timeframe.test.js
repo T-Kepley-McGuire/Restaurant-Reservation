@@ -7,7 +7,7 @@ const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
 const onPageConsole = (msg) =>
   Promise.all(msg.args().map((event) => event.jsonValue())).then((eventJson) =>
-    console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
+    null//console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
   );
 
 describe("US-03 - Create reservation on a future, working date - E2E", () => {
@@ -64,7 +64,7 @@ describe("US-03 - Create reservation on a future, working date - E2E", () => {
         path: ".screenshots/us-02-reservation-almost-closing-before.png",
       });
 
-      await console.log( await page.$(".alert-danger"));
+      //await console.log( await page.$(".alert-danger"));
       await page.screenshot({path: ".screenshots/testing-03.png"});
       expect(await page.$(".alert-danger")).toBeFalsy();
 

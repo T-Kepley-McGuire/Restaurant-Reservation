@@ -81,7 +81,9 @@ function Tables() {
         await setPostError(error);
       }
     }
-    create();
+    if(formData.table_name && formData.table_name.length >= 2) {
+      create();
+    }
   };
 
   const handleCancel = () => {

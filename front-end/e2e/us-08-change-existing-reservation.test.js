@@ -9,7 +9,7 @@ const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
 const onPageConsole = (msg) =>
   Promise.all(msg.args().map((event) => event.jsonValue())).then((eventJson) =>
-    console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
+    null//console.log(`<LOG::page console ${msg.type()}>`, ...eventJson)
   );
 
 describe("US-08 - Change an existing reservation - E2E", () => {
